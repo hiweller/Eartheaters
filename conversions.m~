@@ -3,28 +3,10 @@
 %% STEP ONE: find S/W/E times of videos and log them in Video_specs.xls
 % then turn each .avi into a set of tiffs for storage
 avidir = dir('*.avi');
-for i = 2:length(avidir)
-    savename = sprintf('%s%s', avidir(i).name(1:17), '_AllFrames');
-    v = VideoReader(avidir(i).name);
-    if ~exist(savename, 'dir')
-        mkdir(savename);
-    end
-    k = 1;
-    while v.CurrentTime < v.Duration
-        img = readFrame(v);
-        if k < 10
-            filename = sprintf('%s%s%s%s%s', savename, '/Frame-000', num2str(k), savename, '.jpg');
-        elseif k < 100
-            filename = sprintf('%s%s%s%s%s', savename, '/Frame-00', num2str(k), savename, '.jpg');
-        elseif k < 1000
-            filename = sprintf('%s%s%s%s%s', savename, '/Frame-0', num2str(k), savename, '.jpg');
-        else
-            filename = sprintf('%s%s%s%s%s', savename, '/Frame-', num2str(k), savename, '.jpg');
-        end
-        imwrite(img, filename);
-        k = k+1;
-    end
-
+for i = 1:length(avidir)
+    videoname = sprintf('%s%s%s', raw{i, 1}, '_', raw{i, 3}(1:2));
+    savename = sprintf('%s%s%s%s%s', raw{i, 4}, '_', raw{i, 1}, '_', raw{i, 3});
+    
 end
 
 %% STEP TWO: turn .avi videos into tiff frames and store them according to phase

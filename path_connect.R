@@ -1,0 +1,21 @@
+path_connect <- list(
+	c('FR01_[0-9]+'),
+	c('FR11_[0-9]+'),
+	c('FR[0-9]+_base'),
+	c('FR[0-9]+_tip'),
+	c('FR01_base', 'FR01_tip'),
+	c('FR02_base', 'FR02_tip'),
+	c('FR03_base', 'FR03_tip'),
+	c('FR04_base', 'FR04_tip'),
+	c('FR05_base', 'FR05_tip'),
+	c('FR06_base', 'FR06_tip'),
+	c('FR07_base', 'FR07_tip'),
+	c('FR08_base', 'FR08_tip'),
+	c('FR09_base', 'FR09_tip'),
+	c('FR10_base', 'FR10_tip'),
+	c('FR11_base', 'FR11_tip'),
+	c('FR12_base', 'FR12_tip'),
+	c('FR13_base', 'FR13_tip'),
+	c('FR14_base', 'FR14_tip'),
+	c('FR15_base', 'FR15_tip')
+)

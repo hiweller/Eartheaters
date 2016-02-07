@@ -1,0 +1,15 @@
+FR01	FR01_base	FR01_tip
+FR02	FR02_base	FR02_tip
+FR03	FR03_base	FR03_tip
+FR04	FR04_base	FR04_tip
+FR05	FR05_base	FR05_tip
+FR06	FR06_base	FR06_tip
+FR07	FR07_base	FR07_tip
+FR08	FR08_base	FR08_tip
+FR09	FR09_base	FR09_tip
+FR10	FR10_base	FR10_tip
+FR11	FR11_base	FR11_tip
+FR12	FR12_base	FR12_tip
+FR13	FR13_base	FR13_tip
+FR14	FR14_base	FR14_tip
+FR15	FR15_base	FR15_tip

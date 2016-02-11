@@ -1,8 +1,9 @@
 function avi2tiff(avifile, clipstart, clipend, savename) 
     v = VideoReader(avifile);
-    if ~exist(savename, 'dir')
-        mkdir(savename);
-    end
+%     if ~exist(savename, 'dir')
+%         mkdir(savename);
+%     end
+mkdir(savename);
     v.CurrentTime = clipstart;
     k = 1;
     while v.CurrentTime <= clipend

@@ -1,10 +1,8 @@
-function frames25_fixed(clipfoldername, stepsize)
+function frames_fixed(clipfoldername, stepsize)
 jpgdir = dir([clipfoldername,'/*.jpg']);
 destination = sprintf('%s%s%s%s', clipfoldername, '_', num2str(stepsize), 'FrameIntervals');
 
-if ~exist(destination)
-    mkdir(destination);
-end
+mkdir(destination);
 
 k = 1;
 while k <= length (jpgdir)

@@ -62,9 +62,9 @@ RotatePoints <- function(arr1) {
 
 # rotates coordinates using matrix multiplication with rotation matrix
 
-run <- function(){
+run <- function(file){
 
-	shapes <- readShapes('01-15-16/Shapes/S_SD1_10_5FrameShapes/')
+	shapes <- readShapes(file)
 	shapes$landmarks.pixel[, 2, ] <- -shapes$landmarks.pixel[, 2, ]
 	
 	points <- shapes$landmarks.pixel # n x 2 x m array (n = # points, m = # frames)
@@ -98,7 +98,19 @@ run <- function(){
 	plot(dist.vect(points2, 1, 2), pch=19, type='b', main='Mouth gape',
 	     ylab = 'Distance (pixels)', xlab = 'Frame')
 	print(max(dist.vect(points2, 1, 2)))
+	
+	
+	
+	mouth.gape <- dist.vect(points2, 1, 2)/max(dist.vect(points2, 1, 2))
+	branch.dist <- dist.vect(points2, 6, 7)/max(dist.vect(points2, 6, 7))
+	
+	# BOTH BOTH BOTH
+	plot(branch.dist, pch=19, type='l', col = 'red', main='Branchiostegal distances + Mouth gape',
+	     ylab='Distance (pixels)', lwd=2, xlab = 'Frame')
+	points(c(1:frames), mouth.gape, pch=18, lwd=2, lty=2, col='blue', type='l')
+	legend('bottomright', c('Branchs', 'Mouth'), lty=1, pch=c(19, 18), col=c('red', 'blue'), cex=0.6)
+	
 }
 
 
-run()
+run('01-30-16/Shapes/W_SD3_01_15FrameShapes/')

@@ -103,14 +103,20 @@ run <- function(file){
 	
 	mouth.gape <- dist.vect(points2, 1, 2)/max(dist.vect(points2, 1, 2))
 	branch.dist <- dist.vect(points2, 6, 7)/max(dist.vect(points2, 6, 7))
-	
+	premax.dist <- dist.vect(points2, 1, 3)/max(dist.vect(points2, 1, 3))
 	# BOTH BOTH BOTH
-	plot(branch.dist, pch=19, type='l', col = 'red', main='Branchiostegal distances + Mouth gape',
+	name.index <- strsplit(strsplit(file, split="/")[[1]][3], split="")[[1]][1]
+	if (name.index == 'W') {
+	  frame.index <- seq(1, (frames*15), 15)
+	} else {frame.index <- seq(1, frames*5, 5)}
+	
+	plot(frame.index, branch.dist, pch=19, type='l', col = 'red', main='Branchiostegal distances + Mouth gape',
 	     ylab='Distance (pixels)', lwd=2, xlab = 'Frame')
-	points(c(1:frames), mouth.gape, pch=18, lwd=2, lty=2, col='blue', type='l')
-	legend('bottomright', c('Branchs', 'Mouth'), lty=1, pch=c(19, 18), col=c('red', 'blue'), cex=0.6)
+	points(frame.index, mouth.gape, pch=18, lwd=2, lty=2, col='blue', type='l')
+	points(frame.index, premax.dist, lwd=2, lty=3, col='darkgrey', type='l')
+	legend('bottomright', c('Branchs', 'Mouth', 'Premax'), lty=1, lwd=2, col=c('red', 'blue', 'grey'), cex=0.6)
 	
 }
 
 
-run('01-30-16/Shapes/W_SD3_01_15FrameShapes/')
+run('02-06-16/Shapes/W_SD3_17_15FrameShapes/')

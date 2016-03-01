@@ -1,0 +1,233 @@
+# import csv
+
+# def LF2010(filename):
+# 	rd = {}
+# 	with open(filename, 'rU') as f:
+# 		reader = csv.DictReader(f)
+# 		# reader is now an iterator of row dictionaries with keys as the column names
+# 		for row in reader:
+# 			# whatever order you want!
+# 			rd[ row['Taxon'] ] = [ 
+# 				row['Tissue sample'], row['Voucher'], 
+# 				row['Collection locality'], row['ND4'], row['Cytochrome b'], 
+# 				row['16S'], row['RAG2'], row['S7 NaN Intron 1']
+# 				]
+# 	return rd
+
+import csv
+LF2010 = open('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Phylogenetics/LF2010_GenBank.csv', 'rU')
+
+csvread = csv.reader(LF2010)
+
+species = []
+ND4 = []
+CytB = []
+_16S = []
+RAG2 = []
+S7_Intron1 = []
+for row in csvread:
+	species.append(row[0])
+	ND4.append(row[4])
+	CytB.append(row[5])
+	_16S.append(row[6])
+	RAG2.append(row[7])
+	S7_Intron1.append(row[8])
+
+LF2010.close()
+
+from dendropy.interop import genbank
+ND4_dna = genbank.GenBankDna(ids=ND4, verify=False)
+ND4_char_matrix = ND4_dna.generate_char_matrix(label_components=["organism", "accession"], label_component_separator="_")
+
+CytB_dna = genbank.GenBankDna(ids=CytB, verify=False)
+CytB_char_matrix = CytB_dna.generate_char_matrix(label_components=["organism", "accession"], label_component_separator="_")
+
+_16S_dna = genbank.GenBankDna(ids=_16S, verify=False)
+_16S_char_matrix = _16S_dna.generate_char_matrix(label_components=["organism", "accession"], label_component_separator="_")
+
+RAG2_dna = genbank.GenBankDna(ids=RAG2, verify=False)
+RAG2_char_matrix = RAG2_dna.generate_char_matrix(label_components=["organism", "accession"], label_component_separator="_")
+
+S7_Intron1_dna = genbank.GenBankDna(ids=S7_Intron1, verify=False)
+S7_Intron1_char_matrix = S7_Intron1_dna.generate_char_matrix(label_components=["organism", "accession"], label_component_separator="_")
+
+ND4_char_matrix.write(
+        path='ND4_geophagini.nex',
+        schema='nexus',
+        suppress_taxa_blocks=None,
+        suppress_block_titles=None,
+        file_comments=[],
+        preamble_blocks=[],
+        supplemental_blocks=[],
+        allow_multiline_comments=True,
+        suppress_leaf_taxon_labels=True,
+        suppress_leaf_node_labels=True,
+        suppress_internal_taxon_labels=True,
+        suppress_internal_node_labels=True,
+        suppress_rooting=True,
+        suppress_edge_lengths=True,
+        unquoted_underscores=False,
+        preserve_spaces=False,
+        store_tree_weights=False,
+        translate_tree_taxa=None,
+        suppress_annotations=True,
+        annotations_as_nhx=False,
+        suppress_item_comments=False,
+        node_label_element_separator=' ',
+        node_label_compose_fn=None,
+        edge_label_compose_fn=None,
+        real_value_format_specifier='',
+        ignore_unrecognized_keyword_arguments=True,
+        )
+
+CytB_char_matrix.write(
+        path='CytB_geophagini.nex',
+        schema='nexus',
+        suppress_taxa_blocks=None,
+        suppress_block_titles=None,
+        file_comments=[],
+        preamble_blocks=[],
+        supplemental_blocks=[],
+        allow_multiline_comments=True,
+        suppress_leaf_taxon_labels=True,
+        suppress_leaf_node_labels=True,
+        suppress_internal_taxon_labels=True,
+        suppress_internal_node_labels=True,
+        suppress_rooting=True,
+        suppress_edge_lengths=True,
+        unquoted_underscores=False,
+        preserve_spaces=False,
+        store_tree_weights=False,
+        translate_tree_taxa=None,
+        suppress_annotations=True,
+        annotations_as_nhx=False,
+        suppress_item_comments=False,
+        node_label_element_separator=' ',
+        node_label_compose_fn=None,
+        edge_label_compose_fn=None,
+        real_value_format_specifier='',
+        ignore_unrecognized_keyword_arguments=True,
+        )
+
+_16S_char_matrix.write(
+        path='16S_geophagini.nex',
+        schema='nexus',
+        suppress_taxa_blocks=None,
+        suppress_block_titles=None,
+        file_comments=[],
+        preamble_blocks=[],
+        supplemental_blocks=[],
+        allow_multiline_comments=True,
+        suppress_leaf_taxon_labels=True,
+        suppress_leaf_node_labels=True,
+        suppress_internal_taxon_labels=True,
+        suppress_internal_node_labels=True,
+        suppress_rooting=True,
+        suppress_edge_lengths=True,
+        unquoted_underscores=False,
+        preserve_spaces=False,
+        store_tree_weights=False,
+        translate_tree_taxa=None,
+        suppress_annotations=True,
+        annotations_as_nhx=False,
+        suppress_item_comments=False,
+        node_label_element_separator=' ',
+        node_label_compose_fn=None,
+        edge_label_compose_fn=None,
+        real_value_format_specifier='',
+        ignore_unrecognized_keyword_arguments=True,
+        )
+
+RAG2_char_matrix.write(
+        path='RAG2_geophagini.nex',
+        schema='nexus',
+        suppress_taxa_blocks=None,
+        suppress_block_titles=None,
+        file_comments=[],
+        preamble_blocks=[],
+        supplemental_blocks=[],
+        allow_multiline_comments=True,
+        suppress_leaf_taxon_labels=True,
+        suppress_leaf_node_labels=True,
+        suppress_internal_taxon_labels=True,
+        suppress_internal_node_labels=True,
+        suppress_rooting=True,
+        suppress_edge_lengths=True,
+        unquoted_underscores=False,
+        preserve_spaces=False,
+        store_tree_weights=False,
+        translate_tree_taxa=None,
+        suppress_annotations=True,
+        annotations_as_nhx=False,
+        suppress_item_comments=False,
+        node_label_element_separator=' ',
+        node_label_compose_fn=None,
+        edge_label_compose_fn=None,
+        real_value_format_specifier='',
+        ignore_unrecognized_keyword_arguments=True,
+        )
+
+S7_Intron1_char_matrix.write(
+        path='S7_Intron1_geophagini.nex',
+        schema='nexus',
+        suppress_taxa_blocks=None,
+        suppress_block_titles=None,
+        file_comments=[],
+        preamble_blocks=[],
+        supplemental_blocks=[],
+        allow_multiline_comments=True,
+        suppress_leaf_taxon_labels=True,
+        suppress_leaf_node_labels=True,
+        suppress_internal_taxon_labels=True,
+        suppress_internal_node_labels=True,
+        suppress_rooting=True,
+        suppress_edge_lengths=True,
+        unquoted_underscores=False,
+        preserve_spaces=False,
+        store_tree_weights=False,
+        translate_tree_taxa=None,
+        suppress_annotations=True,
+        annotations_as_nhx=False,
+        suppress_item_comments=False,
+        node_label_element_separator=' ',
+        node_label_compose_fn=None,
+        edge_label_compose_fn=None,
+        real_value_format_specifier='',
+        ignore_unrecognized_keyword_arguments=True,
+        )
+
+
+# print(char_matrix.as_string("nexus"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# from Bio import SeqIO
+
+# for seq_record in SeqIO.parse("ls_orchid.gbk", "genbank"):
+#     print(seq_record.id)
+#     print(repr(seq_record.seq))
+#     print(len(seq_record))

@@ -1,16 +1,20 @@
-setwd('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Coordinates/')
-coorddir <- dir('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Coordinates/',
+setwd('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Dissection_photos/Gill arches improved/')
+coorddir <- dir('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Dissection_photos/Gill arches improved/',
                 pattern='*.csv')
+classifiers <- read.csv('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/MorphoJ_files/classifiers.csv', sep=
+                          '\t')
 
-points <- 19
+points <- 17
 
 finalfile <- matrix(0, nrow=length(coorddir), ncol=points*2)
 for (i in 1:length(coorddir)) {
   coordfile <- read.csv2(coorddir[i], sep=',', header=T)
   newcoords <- as.matrix(coordfile[,2:3])
-  vectorcoords <- as.vector(t(newcoords))
+  vectorcoords <- as.numeric(as.vector(t(newcoords)))
   finalfile[i,] <- vectorcoords
 }
 
-finalfile <- as.data.frame(finalfile, row.names = substr(coorddir, 1, 10), col.names=NULL)
-write.csv(finalfile, '../MorphoJ_files/MorphoJCoordinates.csv')
+# in case you give up like a weakling and want to use morphoj after all
+finalfile <- as.data.frame(finalfile, row.names = substr(coorddir, 1, 10), col.names=FALSE)
+
+write.csv(finalfile, '../../MorphoJ_files/GillCoordinates.csv')

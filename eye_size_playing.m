@@ -1,18 +1,19 @@
 %% MESSIN ABOOT
 
-k = 3;
-m = 5;
+k = 5;
+m = 49;
 datedir = dir('*-16');
 trialdir = dir([datedir(k).name, '/Intervals/*Intervals']);
 jpgdir = dir([datedir(k).name, '/Intervals/', trialdir(m).name, '/*.jpg']);
 pixel.areas = [];
 
 
-for i = 24:length(jpgdir)
+for i = 1:length(jpgdir)
     imagename = sprintf('%s%s%s%s%s', datedir(k).name, '/Intervals/', trialdir(m).name, '/', jpgdir(i).name);
-    pixel.areas(i) = eye_size(imagename, 40); hold on;
+    pixel.areas(i) = eye_size(imagename,15); hold on;
     pause
 end
+trialdir(m).name
 
 
 

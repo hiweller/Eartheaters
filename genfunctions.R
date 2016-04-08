@@ -6,6 +6,10 @@ library(svgViewR)
 library(KernSmooth)
 library(pastecs)
 library(ggplot2)
+library(reshape2)
+
+# scaling
+# note: LOL
 
 # gets avg frequencies (in Hz) and amplitudes (with peak normalized to 1)
 # for every trial in csv, returns a dataframe with amplitudes and frequencies
@@ -112,14 +116,16 @@ getShapeMeasurements <- function() {
     for (j in 1:Q) {
       for (k in 1:length(trials[[j]])) {
         folderName <- paste(folder, trials[[j]][k], sep="")
+        name.ind <- strsplit(folderName, split='/')[[1]][[4]]
+        name.ind <- strsplit(name.ind, split='_')[[1]][1]
         if (length(dir(folderName))!=0) {
           counter[j] <- counter[j]+1
-          newMatrix <- run.shapes(folderName)
+          newMatrix <- run.shapes(folderName, name.index=name.ind)
           measurementMatrix[[1]][[j]][counter[j], 1:length(dir(folderName))] <- newMatrix$mouth.gape
           measurementMatrix[[2]][[j]][counter[j], 1:length(dir(folderName))] <- newMatrix$branch.dist
           measurementMatrix[[3]][[j]][counter[j], 1:length(dir(folderName))] <- newMatrix$premax.dist
-          measurementMatrix[[4]][[j]][counter[j], 1:length(dir(folderName))] <- newMatrix$mouth.angle
-          measurementMatrix[[5]][[j]][counter[j], 1:length(dir(folderName))] <- newMatrix$premax.angle
+          # measurementMatrix[[4]][[j]][counter[j], 1:length(dir(folderName))] <- newMatrix$mouth.angle
+          # measurementMatrix[[5]][[j]][counter[j], 1:length(dir(folderName))] <- newMatrix$premax.angle
         }
       }
     }
@@ -131,6 +137,7 @@ getShapeMeasurements <- function() {
   # save csv files in Measurements folder
   for (j in 1:G) {
     for (k in 1:Q) {
+      measurementMatrix[[j]][[k]] <- measurementMatrix[[j]][[k]][rowSums(is.na(measurementMatrix[[j]][[k]]))>10, ]
       measurementMatrix[[j]][[k]] <- measurementMatrix[[j]][[k]][rowSums(is.na(measurementMatrix[[j]][[k]]))<length(measurementMatrix[[j]][[k]][1,]), ]
       savename <- paste('./Measurements/', phases[k], '_', measurements[j], '.csv', sep="")
       write.csv(measurementMatrix[[j]][[k]], savename)
@@ -138,7 +145,8 @@ getShapeMeasurements <- function() {
   }
 }
 
-run.shapes <- function(file, plotpoints = FALSE, savepath=0){
+run.shapes <- function(file, plotpoints = FALSE, savepath=NULL, scale=TRUE,
+                       name.index=NULL) {
   
   shapes <- readShapes(file)
   points <- shapes$landmarks.pixel
@@ -156,6 +164,27 @@ run.shapes <- function(file, plotpoints = FALSE, savepath=0){
   # points3 <- RotatePoints(points2)
   
   frames <- length(points2[1,1,])
+  
+  # name.index <- strsplit(strsplit(file, split="/")[[1]][3], split="")[[1]][1]
+  if (name.index == 'W') {
+    frame.index <- seq(1, (frames*15), 15)
+  } else {frame.index <- seq(1, frames*5, 5)}
+  
+  mouth.gape <- dist.vect(points2, 1, 2)#/max(dist.vect(points2, 1, 2))
+  branch.dist <- dist.vect(points2, 6, 7)#/max(dist.vect(points2, 6, 7))
+  premax.dist <- dist.vect(points2, 1, 3)#/max(dist.vect(points2, 1, 3))
+  premax.angle <- vector()
+  # getting premax angle?
+  for (i in 1:dim(points2)[3]) {
+    a <- get.dist(points2[1,,i], points2[3,,i])
+    b <- get.dist(points2[3,,i], points2[4,,i])
+    c <- get.dist(points2[1,,i], points2[4,,i])
+    if (NA %in% c(a, b, c)) {
+      premax.angle[i] <- NA
+    } else {
+      premax.angle[i] <- TriangleCalc(a,b,c)[1]
+    }
+  }
   
   if (plotpoints == TRUE) {
     
@@ -177,7 +206,7 @@ run.shapes <- function(file, plotpoints = FALSE, savepath=0){
     legend('topleft', c('Premax', 'Dent', 'Max.Ant', 'Max.Post', 'Mouth.corner', 'Operculum',
                         'Branchiostegals', 'Eye', 'Epaxial'), pch=19, col=c(1:points.n), cex=0.6)
   
-    if (savepath != 0) {
+    if (is.null(savepath)==FALSE) {
       dev.copy(png, filename = paste(savepath, 'Distances.png', sep=""))
       plot(frame.index, branch.dist, pch=19, type='l', col = 'red', main=file,
            ylab='Distance (pixels)', lwd=2, xlab = 'Frame')
@@ -194,29 +223,121 @@ run.shapes <- function(file, plotpoints = FALSE, savepath=0){
     }
   }
   
-  mouth.gape <- dist.vect(points2, 1, 2)/max(dist.vect(points2, 1, 2))
-  branch.dist <- dist.vect(points2, 6, 7)/max(dist.vect(points2, 6, 7))
-  mouth.angle <- mouth.angles(points2, 1, 5, 2)
-  premax.dist <- dist.vect(points2, 1, 3)/max(dist.vect(points2, 1, 3))
-  premax.angle <- vector()
-  # getting premax angle?
-  for (i in 1:dim(points2)[3]) {
-    a <- get.dist(points2[1,,i], points2[3,,i])
-    b <- get.dist(points2[3,,i], points2[4,,i])
-    c <- get.dist(points2[1,,i], points2[4,,i])
-    premax.angle[i] <- TriangleCalc(a,b,c)[1]
+  # name.index <- strsplit(strsplit(file, split="/")[[1]][3], split="")[[1]][1]
+  
+  if (name.index == 'W') {
+    frame.index <- seq(1, (frames*15), 15)*1/500
+  } else {frame.index <- seq(1, frames*5, 5)*1/500}
+  
+  getback <- data.frame(mouth.gape, branch.dist, premax.dist, frame.index)
+  
+  if (scale==TRUE) {
+    fishScales <- read.csv('../Data_sheets/Video_names.csv')
+    fishScales <- droplevels(fishScales)
+    folderID <- strsplit(file, split='FrameShapes')[[1]][1]
+    folderID <- strsplit(folderID, split='/')[[1]]
+    folderID <- folderID[length(folderID)]
+    scaleIndex <- match(folderID, fishScales$Trial)
+    scaleFactor <- (fishScales$Scale_factors[scaleIndex])/10 # pixels/cm*1 cm/10 mm = pixels/mm
+    getback$mouth.gape <- getback$mouth.gape*1/scaleFactor # pixels * mm/pixel = mm
+    getback$branch.dist <- getback$branch.dist*1/scaleFactor
+    getback$premax.dist <- getback$premax.dist*1/scaleFactor
   }
   
-  
-  name.index <- strsplit(strsplit(file, split="/")[[1]][3], split="")[[1]][1]
-  if (name.index == 'W') {
-    frame.index <- seq(1, (frames*15), 15)
-  } else {frame.index <- seq(1, frames*5, 5)}
-  
-  getback <- data.frame(mouth.gape, branch.dist, premax.dist, mouth.angle, premax.angle)
   return(getback)
 }
 
+repTrial <- function (q=5, vid='*_SD2_06_*', linetypes=c(1,5,6), linewidths=c(1,1,1),
+                      ym=0.35) {
+  # one representative trial
+  date <- dir('./', pattern='*16')
+  rep.trial <- dir(paste('./', date[q], '/Shapes', sep=""), pattern=vid) # in order: E, S, W
+  order <- c(2,3,1)
+  lengths <- vector('list', 3)
+  trial.mats <- vector('list', 3)
+  frame.spacing <- c(0.01, 0.03, 0.01)
+  name.index <- c('E', 'W', 'S')
+  M <- 3 # order is mouth gape, branch dist, premax dist
+  distances <- vector("list", M)
+  frame.indices <- vector("list", M)
+  for (i in 1:3) {
+    trial.mats[[i]] <- run.shapes(paste('./', date[q], '/Shapes/', rep.trial[order[i]], sep=""), name.index=name.index[i])
+    lengths[[i]] <- length(dir(paste('./', date[q], '/Shapes/', rep.trial[order[i]], '/', sep=""), pattern="*.txt"))*frame.spacing[i]
+  }
+  for (i in 1:M) {
+    for (j in 1:3) {
+      if (j == 1) {
+        frames <- trial.mats[[j]]$frame.index
+      } else {frames <- trial.mats[[j]]$frame.index+frame.indices[[i]][length(frame.indices[[i]])]}
+      distances[[i]] <- c(distances[[i]], trial.mats[[j]][,i])
+      frame.indices[[i]] <- c(frame.indices[[i]], frames)
+    }
+  }
+  
+  spline.dist <- vector("list", M)
+  for (i in 1:M) {
+    splinefit <- smooth.spline(frame.indices[[i]], distances[[i]], spar=0.25)
+    predicts <- predict(splinefit, data=frame.indices[[i]])$y
+    predicts <- predicts - min(predicts)
+    spline.dist[[i]] <- predicts
+  }
+  
+  # messy messy
+  representative.df <- data.frame(mouth.gape=spline.dist[[1]], branch.dist=spline.dist[[2]],
+                                  premax=spline.dist[[3]], frames=frame.indices[[1]])
+  meltRep <- melt(representative.df, id=4)
+  
+  r <- ggplot(data=meltRep, aes(x=frames, y=value, color=variable)) +
+    geom_line(data=meltRep, aes(linetype=variable, size=variable)) + 
+    scale_linetype_manual(values=linetypes, name='Measurements',
+                          breaks=c('mouth.gape', 'branch.dist', 'premax'),
+                          labels=c('Mouth gape', 'Branchiostegal exp.', 'Premax protrusion')) + 
+    scale_size_manual(values=linewidths, name='Measurements',
+                      breaks=c('mouth.gape', 'branch.dist', 'premax'),
+                      labels=c('Mouth gape', 'Branchiostegal exp.', 'Premax protrusion')) + 
+    scale_color_manual(values=c('indianred2', 'dodgerblue', 'mediumorchid2'), name='Measurements',
+                       breaks=c('mouth.gape', 'branch.dist', 'premax'),
+                       labels=c('Mouth gape', 'Branchiostegal exp.', 'Premax protrusion')) + 
+    xlab('Seconds') + ylab('Distance (mm)') + 
+    geom_vline(xintercept = (lengths[[1]]-0.01), lwd=0.7, alpha=0.5) +
+    geom_vline(xintercept = (lengths[[2]] + lengths[[1]] - 0.03), lwd=0.7, alpha=0.5)
+  r <- r + annotate("rect", xmin=(lengths[[1]]/3-0.1), xmax=(lengths[[1]]/3+0.1), ymin=6-ym, ymax=6+ym, alpha=.2)
+  r <- r + annotate("rect", xmin=(0.75-0.185), xmax=(0.75+0.185), ymin=6-ym, ymax=6+ym, alpha=.2)
+  r <- r + annotate("rect", xmin=(1.51-0.115), xmax=(1.51+0.115), ymin=6-ym, ymax=6+ym, alpha=.2)
+  r <- r + annotate("text", x = c(lengths[[1]]/3, 0.75, 1.51), y = 6, label = c("Strike", "Winnowing", "Ejection"), size=8)
+  r <- r + theme(text=element_text(size=15))
+  return(r)
+}
+
+meanPlots <- function() {
+  # plotting means w/ standard error bars to look at general behavior
+  phases <- c('S', 'W', 'E')
+  titles <- c('Strike', 'none', 'none', 'Winnowing', 'none', 'none', 'Ejection', 'none', 'none')
+  xlabel <- c("", "", 'Seconds')
+  Wstate <- phases=='W'
+  measurements <- c('mouthgape', 'premax', 'branchiostegals')
+  Q <- length(phases)
+  G <- length(measurements)
+  ylabels <- c('Mouth gape', '', '', 'Premax. dist.', '', '', 'Branch. exp.', '', '')
+  graphs <- rep(list(vector("list", Q)), G)
+  colors <- c('sienna1', 'tomato1', 'firebrick1', 
+              'orchid1', 'mediumorchid2', 'darkorchid2',
+              'cyan2', 'dodgerblue1', 'royalblue1')
+  # 'seagreen1', 'springgreen3', 'forestgreen')
+  
+  for (i in 1:G) { # for every measurement
+    for (j in 1:Q) { # for every phase
+      graphs[[i]][[j]] <- graphAlignPeaksGG(paste('./Measurements/', phases[j], '_', measurements[i], '.csv', sep=""),
+                                            col=paste(colors[Q*(i-1)+j]), xlab=xlabel[i],
+                                            main=titles[Q*(j-1)+i], ylab=ylabels[Q*(i-1)+j], W=Wstate[j])
+    }
+  }
+  
+  # plot mouth gape, premax distance, branch expansion for each phase
+  for (i in 1:G) {
+    multiplot(graphs[[1]][[i]], graphs[[2]][[i]], graphs[[3]][[i]])
+  }
+}
 
 # takes matrix of distance vectors generated by getShapeMeasurements()
 # aligns them by peaks and returns matrix of aligned vectors
@@ -230,7 +351,7 @@ graphAlignPeaks <- function(alignMatrix) {
 }
 
 graphAlignPeaksGG <- function(filepath, col=4, xlab='Seconds', ylab='Normalized distance', 
-                              main='You forgot to give me a title again you sad bastard',
+                              main='none',
                               W=FALSE, lty=1) {
   
   # get matrix aligned by peaks
@@ -313,11 +434,15 @@ graphAlignPeaksGG <- function(filepath, col=4, xlab='Seconds', ylab='Normalized 
   mean.df$se.plus <- mean.df$vec+stderrors 
   mean.df$se.minus <- mean.df$vec-stderrors 
   
-  p <- ggplot(data=mean.df, aes(x=frame, y=vec), color=col) + xlab(xlab) + ylab(ylab) + ggtitle(main) + 
-    geom_ribbon(aes(ymin=se.minus, ymax=se.plus), na.rm=TRUE, alpha=0.2)
+  p <- ggplot(data=mean.df, aes(x=frame, y=vec), color=col) + xlab(xlab) + ylab(ylab) +
+    geom_ribbon(aes(ymin=se.minus, ymax=se.plus), na.rm=TRUE, alpha=0.2) +
+    theme(text = element_text(size=15)) 
   p <- p + geom_line(data=align.df, aes(x=Var2, y=value, group=Var1, color=factor(Var1)), alpha=0.5, na.rm = TRUE) + theme(legend.position = "none")
-  p <- p + geom_line(data=mean.df, aes(x=frame, y=vec), na.rm=TRUE, color=col, lwd=1, alpha=1, lty=lty)
-  p
+  p <- p + geom_line(data=mean.df, aes(x=frame, y=vec), na.rm=TRUE, color=col, lwd=1.5, alpha=1, lty=lty)
+  
+  if (main != 'none') {
+    p <- p + ggtitle(main)
+  }
   
   return(p)
 }
@@ -393,15 +518,15 @@ dist.vect <- function(arr1, p1, p2) {
   return(new.vect)
 }
 
-TranslatePoints <- function(arr1) {
+TranslatePoints <- function(arr1, p1=8) {
   
   # empty array to fill
   arr2 <- array(data = NA, dim(arr1))
   
   # fills array with translated coordinates
   for (i in 1:length(arr1[1,1,])){
-    Dx <- arr1[8,1,i] # amount to translate x by (just X1)
-    Dy <- arr1[8,2,i] # amount to translate y by
+    Dx <- arr1[p1,1,i] # amount to translate x by (just X1)
+    Dy <- arr1[p1,2,i] # amount to translate y by
     TMatrix <- cbind(rep(-Dx, length(arr1[,1,1])), rep(-Dy, length(arr1[,1,1]))) # matrix to add to original matrix
     arr2[ , , i] <- arr1[ , , i] + TMatrix # translates each point by -Dx, -Dy
   }
@@ -468,9 +593,9 @@ mouth.angles <- function(arr,p1,p2,p3) {
 
 TriangleCalc <- function(a, b, c) {
   
-  check1 <- 0
-  check2 <- 0
-  check3 <- 0
+  check1 = 0
+  check2 = 0
+  check3 = 0
   
   con <- 2*pi/360
   

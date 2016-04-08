@@ -31,7 +31,10 @@ value = 0.74;
 diffo = abs(value-extenty);
 [idx idx] = min(diffo);
 closest = areas(idx);
-% imshow(alternate); hold on; plot(stats.Centroid(idx,1), stats.Centroid(idx,2), 'b*'); hold off
-imshow(image); hold on; plot(stats.Centroid(idx,1), stats.Centroid(idx,2), 'c*'); hold off
+% imshow(alternate); hold on;
+imshow(image); hold on; 
+plot(stats.Centroid(idx,1), stats.Centroid(idx,2), 'c*');
+title (imagename);
+hold off
 
 end

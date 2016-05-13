@@ -8,8 +8,9 @@ library(pastecs)
 library(ggplot2)
 library(reshape2)
 
-# scaling
-# note: LOL
+coVar <- function(vec) {
+  return(sd(vec, na.rm=TRUE)/mean(vec, na.rm=TRUE)*100)
+}
 
 # gets avg frequencies (in Hz) and amplitudes (with peak normalized to 1)
 # for every trial in csv, returns a dataframe with amplitudes and frequencies

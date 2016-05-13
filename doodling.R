@@ -3,6 +3,25 @@ source('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Code/Read shapes.R
 setwd('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Data_sheets/')
 videos <- read.csv('Video_names.csv')
 
+# getting coefficient of variation for oral gape, premax excursion,
+# branch expansion during stages
+
+# for table 1 of text (3 phases)
+tab1Means <- c(0.33, 7.14, 5.44, 2.74,
+               1.31, 3.63, 3.46, 2.53,
+               0.53, 8.53, 5.33, 2.11)
+tab1SD <- c(0.09, 0.99, 0.70, 0.54,
+            0.93, 1.01, 0.80, 0.49,
+            0.21, 0.86, 0.78, 0.63)
+CV1 <- tab1SD/tab1Means
+
+
+# table 2 (just winnowing)
+tab2Means <- c(6.10, 7.77, 1.99, 2.45, 2.72)
+tab2SD <- c(0.99, 5.82, 0.48, 0.86, 0.62)
+CV2 <- tab2SD/tab2Means
+CV2
+
 ## correlate mouth gape with frequency?
 # get max gape and frequency for each trial?
 better2gether <- paste(videos$Date, videos$Trial)
@@ -177,3 +196,8 @@ lengths <- function(csv) {
   }
   return(finalvec)
 }
+
+## FFTs
+winnows <- as.matrix(read.csv('Measurements/W_branchiostegals.csv'))
+winnow1 <- as.matrix(winnows[1,is.na(winnows[1,])==FALSE])
+FFT.test <- fft(winnow1)

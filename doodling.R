@@ -1,6 +1,6 @@
-source('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Code/genfunctions.R')
-source('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Code/Read shapes.R')
-setwd('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Data_sheets/')
+source('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Code/genfunctions.R')
+# source('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Code/Read shapes.R')
+setwd('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Data/Data_sheets/')
 videos <- read.csv('Video_names.csv')
 
 # getting coefficient of variation for oral gape, premax excursion,
@@ -29,6 +29,81 @@ better2gether <- paste(videos$Date, videos$Trial)
 strikes <- as.character(better2gether[which(substr(better2gether, 10, 10) %in% 'S')])
 # names of all winnowing videos
 winnows <- as.character(better2gether[which(substr(better2gether, 10, 10) %in% 'W')])
+# names of all the other ones. ejection videos?
+ejections <- as.character(better2gether[which(substr(better2gether, 10, 10) %in% 'E')])
+
+
+specTags <- vector("list", 3)
+names(specTags) <- c("SD1", "SD2", "SD3")
+# question: does max gape during strike depend on individual?
+for (i in 1:length(strikes)) {
+  # get date and specimen info
+  dateInd <- substr(strikes[i], 1, 8)
+  specTag <- as.numeric(substr(strikes[i], 14, 14))
+  dateInd <- gsub("/", "-", dateInd)
+  
+  # make file names for accessing vids
+  strikeName <- paste(substr(strikes[i], 10, nchar(strikes[i])), 'FrameShapes', sep="")
+  strikeDir <- paste('../Videos/', dateInd, '/Shapes/', strikeName, '/', sep="")
+  
+  if (length(dir(strikeDir, pattern='*.txt'))!=0) {
+    measurements <- run.shapes(strikeDir, name.index='S')
+    mouthGape <- max(measurements$mouth.gape)
+    specTags[[specTag]] <- append(specTags[[specTag]], mouthGape)
+  }
+}
+summary(sigTest(specTags)[[1]])
+
+specTags <- vector("list", 3)
+names(specTags) <- c("SD1", "SD2", "SD3")
+for (i in 1:length(winnows)) {
+  # get date and specimen info
+  dateInd <- substr(winnows[i], 1, 8)
+  specTag <- as.numeric(substr(winnows[i], 14, 14))
+  dateInd <- gsub("/", "-", dateInd)
+  
+  # make file names for accessing vids
+  winnowName <- paste(substr(winnows[i], 10, nchar(winnows[i])), 'FrameShapes', sep="")
+  winnowDir <- paste('../Videos/', dateInd, '/Shapes/', winnowName, '/', sep="")
+  
+  if (length(dir(winnowDir, pattern='*.txt'))!=0) {
+    measurements <- run.shapes(winnowDir, name.index='S')
+    mouthGape <- max(measurements$mouth.gape)
+    specTags[[specTag]] <- append(specTags[[specTag]], mouthGape)
+  }
+}
+summary(sigTest(specTags)[[1]])
+
+specTags <- vector("list", 3)
+names(specTags) <- c("SD1", "SD2", "SD3")
+for (i in 1:length(ejections)) {
+  # get date and specimen info
+  dateInd <- substr(ejections[i], 1, 8)
+  specTag <- as.numeric(substr(ejections[i], 14, 14))
+  dateInd <- gsub("/", "-", dateInd)
+  
+  # make file names for accessing vids
+  ejectionName <- paste(substr(ejections[i], 10, nchar(ejections[i])), 'FrameShapes', sep="")
+  ejectionDir <- paste('../Videos/', dateInd, '/Shapes/', ejectionName, '/', sep="")
+  
+  if (length(dir(ejectionDir, pattern='*.txt'))!=0) {
+    measurements <- run.shapes(ejectionDir, name.index='S')
+    mouthGape <- max(measurements$mouth.gape)
+    specTags[[specTag]] <- append(specTags[[specTag]], mouthGape)
+  }
+}
+summary(sigTest(specTags)[[1]])
+
+sigTest <- function(specTags) {
+  allDist <- unlist(specTags)
+  IDs <- c(rep("SD1", length(specTags[[1]])), 
+           rep("SD2", length(specTags[[2]])),
+           rep("SD3", length(specTags[[3]])))
+  test <- data.frame(ID = IDs, dist = allDist)
+  fit <- glm(allDist ~ factor(IDs))
+  fit2 <- aov(allDist~factor(IDs))
+  return(list(fit, fit2))}
+
 
 matches <- intersect(paste(substr(winnows, 1, 8), substr(winnows, 11, 18)), paste(substr(strikes, 1, 8), substr(strikes, 11, 18)))
 substr(strikes, 11, 18) %in% matches[i]
@@ -40,36 +115,58 @@ height <- vector()
 frequency <- vector()
 counter <- 0
 peakNum <- vector()
+
+specTags <- vector("list", 3)
+names(specTags) <- c("SD1", "SD2", "SD3")
 for (i in 1:length(winnows)) {
+  # get date and specimen info
   dateInd <- substr(winnows[i], 1, 8)
+  specTag <- as.numeric(substr(winnows[i], 14, 14))
   dateInd <- gsub("/", "-", dateInd)
+  
+  # make file names for accessing vids
   winnowName <- paste(substr(winnows[i], 10, nchar(winnows[i])), 'FrameShapes', sep="")
   winnowDir <- paste('../Videos/', dateInd, '/Shapes/', winnowName, '/', sep="")
   
+  # only bother if this was actually digitized (i.e. there are actually shapes files in the folder)
   if (length(dir(winnowDir, pattern='*.txt'))!=0) {
+    # use number of actually digitized trials for index
     counter <- counter + 1
+    
+    # pull out shape distances for each file using run.shapes from genfunctions.R
     winnowDistances <- run.shapes(winnowDir, name.index='W')
     vec <- winnowDistances$branch.dist
     mouthvec <- winnowDistances$mouth.gape
     premaxvec <- winnowDistances$premax.dist
+    
+    # get peaks of expansion for each of three measurements
     peaks <- extract(turnpoints(vec), peak=1, pit=0)
     peaksMouth <- extract(turnpoints(mouthvec), peak=1, pit=0)
     peaksPremax <- extract(turnpoints(premaxvec), peak=1, pit=0)
     
     peakInd <- which(peaks %in% 1) # indices of peaks
+    
+    # store number of peaks
     peakNum <- c(peakNum, length(peakInd))
+    
+    # peak indices
     peakIndMouth <- which(peaksMouth %in% 1)
     peakIndPremax <- which(peaksPremax %in% 1)
     peakHeight <- vector()
     peakDist <- vector()
     peakHeightMouth <- vector()
     peakHeightPremax <- vector()
+    
+    # for every peak index, store the measured value at that index in a new vector
     for (k in peakInd) {
       peakHeight <- append(peakHeight, vec[k])
     }
+    
+    # measure distances between peaks
     for (j in 1:(length(peakInd)-1)) {
       peakDist[j] <- peakInd[j+1]-peakInd[j]
     }
+    
     for (l in peakIndMouth) {
       peakHeightMouth <- append(peakHeightMouth, mouthvec[l])
     }
@@ -77,6 +174,11 @@ for (i in 1:length(winnows)) {
       peakHeightPremax <- append(peakHeightPremax, premaxvec[l])
     }
     peakDist <- peakDist*0.03 # milliseconds per 15 frames so peak distances are in seconds
+    
+    # store the distances between peaks
+    byCycle[[counter]] <- peakDist
+    
+    specTags[[specTag]] <- append(specTags[[specTag]], mean(peakHeight))
     
     height <- c(height, mean(peakHeight))
     maxGape <- c(maxGape, mean(peakHeightMouth))
@@ -86,6 +188,22 @@ for (i in 1:length(winnows)) {
     frequency <- c(frequency, 1/mean(peakDist))
   }
 }
+# for (i in 1:length(byCycle)) {
+#   if(sum(is.na(byCycle[[i]]))==0)
+#   {plot(byCycle[[i]], pch=19, type = 'b')}
+# }
+
+allDist <- unlist(specTags)
+IDs <- c(rep("SD1", length(specTags[[1]])), 
+         rep("SD2", length(specTags[[2]])),
+         rep("SD3", length(specTags[[3]])))
+fit <- glm(allDist ~ factor(IDs))
+
+# taking overall mean peak distance (rather than the mean of the mean for each trial)
+# as i think about it now there is no point to this.
+mean(1/unlist(byCycle), na.rm=T)
+sd(unlist(byCycle), na.rm=T)
+coVar(1/unlist(byCycle))
 
 maxGape <- vector()
 maxBranch <- vector()
@@ -132,6 +250,8 @@ for (i in 1:length(matches)) {
     frequency <- c(frequency, 1/mean(peakDist))
   }
 }
+
+
 # if there is a strike and winnowing trial for the same video name
 # get the frequency and amplitude of the winnowing
 # get the maximum mouth gape of the strike

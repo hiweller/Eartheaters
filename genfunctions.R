@@ -1,4 +1,4 @@
-setwd('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Videos/')
+setwd('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Data/Videos/')
 par(mar=c(3.1,3.1,3.1,2.1), mgp=c(2,1,0))
 
 library(StereoMorph)

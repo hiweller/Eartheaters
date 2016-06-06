@@ -1,4 +1,4 @@
-setwd('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/Videos/')
+setwd('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Data/Videos/')
 library(StereoMorph)
 library(jpeg)
 

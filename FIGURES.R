@@ -1,4 +1,4 @@
-source('/Users/hannah/Documents/Westneat Lab/Eartheater Project/Code/genfunctions.R')
+source('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Code/genfunctions.R')
 
 # uncomment only if new data have been added to shapes folders! takes ~30 seconds to run
 # gets and normalizes mouth gape, branchiostegal expansion, premax distance

@@ -1,8 +1,9 @@
 source('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Code/genfunctions.R')
-# source('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Code/Read shapes.R')
 setwd('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Data/Data_sheets/')
 videos <- read.csv('Video_names.csv')
 
+branchDist <- read.csv('../Videos/Measurements/W_branchiostegals.csv')[,-1]
+for(i in 1:dim(branchDist)[1]){plot(branchDist[i,][is.na(branchDist[i,])==FALSE], type='l', ylab=i)}
 # getting coefficient of variation for oral gape, premax excursion,
 # branch expansion during stages
 

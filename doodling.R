@@ -267,7 +267,7 @@ cbPalette <- c('dodgerblue', 'lightgreen', 'yellowgreen',
                'green3', 'goldenrod1', 'brown1',
                'coral','lightslateblue', 'darkgreen',
                'mediumseagreen', 'turquoise', 'royalblue3')
-procrustes <- read.delim('/Users/hannah/Dropbox/Westneat Lab/Eartheater Project/Data/MorphoJ_files/03-13-16.txt', sep='\t')
+procrustes <- read.delim('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Data/MorphoJ_files/06-28-2016.txt', sep='\t')
 
 proc.coords <- procrustes[,3:40]
 
@@ -277,7 +277,7 @@ PC2 <- -PCA$x[,2]
 eigenvalues <- PCA$sdev^2/sum(PCA$sdev^2)
 Genus <- procrustes[,2]
 PCdataframe <- data.frame(Genus, PC1, PC2)
-
+library(ggplot2)
 g <- ggplot(PCdataframe, aes(x=PC1, y=PC2, label=Genus))
 g <- g + geom_point(aes(color=factor(Genus)), size=3)
 g <- g + scale_color_manual(values=cbPalette, name='Genus')

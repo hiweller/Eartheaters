@@ -279,11 +279,13 @@ Genus <- procrustes[,2]
 PCdataframe <- data.frame(Genus, PC1, PC2)
 library(ggplot2)
 g <- ggplot(PCdataframe, aes(x=PC1, y=PC2, label=Genus))
-g <- g + geom_point(aes(color=factor(Genus)), size=3)
+g <- g + geom_point(aes(color=factor(Genus)), size=4.5)
 g <- g + scale_color_manual(values=cbPalette, name='Genus')
 g <- g + xlab('PC1 (49.7% explained var.)') + ylab('PC2 (18.7% explained var.)')
-g <- g + theme(text=element_text(size=15))
+g <- g + theme(text=element_text(size=20))
 print(g)
+
+ggsave(filename = '../Manuscript/Figs/PCA.eps', plot=last_plot(), dpi=600)
 
 
 ## timing?

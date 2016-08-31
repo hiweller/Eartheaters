@@ -5,6 +5,44 @@ phases <- c("S", "W", "E")
 filenames <- vector("list", 3)
 names(filenames) <- phases
 
+winnowLength <- vector()
+winnowTrials <- videos[substr(videos$Trial, 1, 1)=='W', ]
+specSave <- vector("list", 3)
+names(specSave) <- c("SD1", "SD2", "SD3")
+for (i in 1:dim(winnowTrials)[1]) {
+  row <- winnowTrials[i,]
+  # dateInd <- substr(row[2], 1, 8)
+  dateInd <- gsub("/", "-", row$Date) # date index for finding shapes file
+  specTag <- substr(row$Trial, 3, 5) # specimen ID (SD1, SD2, or SD3)
+
+  # make file names for accessing vids
+  trialName <- paste(row$Trial, 'FrameShapes', sep="")
+  trialDir <- paste('./', dateInd, '/Shapes/', trialName, '/', sep="")
+  
+  if (length(dir(trialDir, pattern='*.txt'))!=0) {
+    shapes <- run.shapes(trialDir, name.index='W')
+    winnowLength <- c(winnowLength, length(shapes$mouth.gape)*0.03)
+    if (specTag=='SD1') {
+      specSave$SD1 <- c(specSave$SD1, length(shapes$mouth.gape)*0.03)
+    } else if (specTag=='SD2') {
+      specSave$SD2 <- c(specSave$SD2, length(shapes$mouth.gape)*0.03)
+    } else {specSave$SD3 <- c(specSave$SD3, length(shapes$mouth.gape)*0.03)
+}
+  }
+}
+
+CVadj <- function(vec) {
+  vec <- vec[is.na(vec)==FALSE]
+  CVa <- (1 + 1/(4*length(vec)))*sd(vec)/mean(vec)
+  return(CVa)
+}
+
+CVs <- vector()
+for (i in 1:length(specSave)) {
+  vec <- specSave[[i]]
+  CVs <- c(CVs, CVadj(vec))
+}
+
 # k to summarize:
 # CVtable is CVs of every feeding stage per individual per measurement
 # shows that winnowing is most variable/has largest CVs for each, regardless of individual
@@ -15,6 +53,7 @@ branchDist=numeric()
 premaxDist=numeric()
 specID=character()
 stage=character()
+cycleLength <- vector()
 
 col.names=c("mouthGape", "branchDist", "premaxDist", "specID", "stage")
 
@@ -29,6 +68,10 @@ for (i in 1:dim(videos)[1]) {
   trialDir <- paste('./', dateInd, '/Shapes/', trialName, '/', sep="")
   
   if (length(dir(trialDir, pattern='*.txt'))!=0) {
+    cycleLength <- length(measurements$mouth.gape)
+    if (phaseTag == 'W') {
+      cycleLength <- cycleLength*0.03
+    } else {cycleLength <- cycleLength*0.01}
     measurements <- run.shapes(trialDir, name.index=phaseTag)
     mouthGape <- append(mouthGape, max(measurements$mouth.gape))
     branchDist <- append(branchDist, max(measurements$branch.dist))

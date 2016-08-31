@@ -19,8 +19,9 @@ peakFreq <- function(filepath) {
   alignMatrix <- alignPeaks(filepath)
   
   Height <- vector()
+  SDHeight <- vector()
   Freq <- vector()
-  
+  SDFreq <- vector()
   for (i in 1:dim(alignMatrix)[1]) {
     vec <- alignMatrix[i,]
     vec <- vec[is.na(vec)==FALSE]
@@ -40,9 +41,12 @@ peakFreq <- function(filepath) {
     peakDist <- peakDist*0.03 # milliseconds per 15 frames so peak distances are in seconds
     
     Height[i] <- mean(peakHeight)
+    SDHeight[i] <- sd(peakHeight)
     Freq[i] <- 1/mean(peakDist) # frequency in Hz (cycles/second)
+    SDFreq[i] <- sd(peakDist)
   }
-  peakFrame <- data.frame(Amplitude=Height/2, Frequency=Freq)
+  peakFrame <- data.frame(Height=Height, SDHeight=SDHeight, Frequency=Freq, SDFreq=SDFreq)
+  
   return(peakFrame)
 }
 
@@ -437,7 +441,7 @@ graphAlignPeaksGG <- function(filepath, col=4, xlab='Seconds', ylab='Normalized 
   
   p <- ggplot(data=mean.df, aes(x=frame, y=vec), color=col) + xlab(xlab) + ylab(ylab) +
     geom_ribbon(aes(ymin=se.minus, ymax=se.plus), na.rm=TRUE, alpha=0.2) +
-    theme(text = element_text(size=15)) 
+    theme(text = element_text(size=20)) 
   p <- p + geom_line(data=align.df, aes(x=Var2, y=value, group=Var1, color=factor(Var1)), alpha=0.5, na.rm = TRUE) + theme(legend.position = "none")
   p <- p + geom_line(data=mean.df, aes(x=frame, y=vec), na.rm=TRUE, color=col, lwd=1.5, alpha=1, lty=lty)
   

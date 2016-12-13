@@ -1,5 +1,3 @@
-setwd('/Users/hannah/Dropbox/Westneat_Lab/Eartheater Project/Data/EBL/')
-
 library('StereoMorph')
 library('dplyr')
 
